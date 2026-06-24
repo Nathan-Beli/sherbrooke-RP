@@ -1,3 +1,13 @@
-"scripts": {
-  "start": "node index.js"
+{
+  "name": "sherbrooke-rp",
+  "version": "1.0.0",
+  "description": "Bot pour Sherbrooke RP",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.5"
+  }
 }
