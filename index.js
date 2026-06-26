@@ -1,9 +1,15 @@
 const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes } = require('discord.js');
+const http = require('http'); // 1. Ajout du module http
 
-// Initialisation du client
+// 2. Création d'un serveur minimal pour satisfaire le Health Check
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('Bot est en ligne !');
+});
+server.listen(process.env.PORT || 3000); // Utilise le port assigné par l'hébergeur
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// Définition de la commande /say
 const command = new SlashCommandBuilder()
     .setName('say')
     .setDescription('Le bot répète votre message')
@@ -12,25 +18,18 @@ const command = new SlashCommandBuilder()
             .setDescription('Ce que le bot doit dire')
             .setRequired(true));
 
-// Gestion de l'interaction
 client.on('interactionCreate', async interaction => {
     if (!interaction.isChatInputCommand()) return;
-
     if (interaction.commandName === 'say') {
         const message = interaction.options.getString('message');
-        
-        // Envoi du message (ephemeral: true signifie que seul l'auteur voit la confirmation, 
-        // optionnel si vous voulez que le bot parle dans le canal)
         await interaction.reply({ content: 'Message envoyé !', ephemeral: true });
         await interaction.channel.send(message);
     }
 });
 
-// Connexion et enregistrement de la commande
-client.once('ready', async () => {
+// Note : Correction de l'événement en 'clientReady' comme indiqué dans vos logs
+client.once('clientReady', async () => { 
     console.log(`Bot connecté en tant que ${client.user.tag}`);
-    
-    // Enregistrement dynamique de la commande
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
     try {
         await rest.put(Routes.applicationCommands(client.user.id), { body: [command.toJSON()] });
@@ -40,5 +39,4 @@ client.once('ready', async () => {
     }
 });
 
-// Connexion sécurisée via la variable d'environnement
 client.login(process.env.DISCORD_TOKEN);
